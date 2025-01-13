@@ -7,4 +7,5 @@ let registerSchema = new Schema({
   password: { type: String, required: true },
 });
 
-export const register = model("users", registerSchema);
+const Register = model("users", registerSchema);
+export default Register;

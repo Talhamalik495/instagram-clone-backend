@@ -18,6 +18,7 @@ mongoose
   });
 
 app.use("/auth", router);
+app.use("/story");
 app.get("/", (req, res) => {
   res.send("Get request called");
 });
