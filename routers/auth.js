@@ -1,28 +1,64 @@
 import express from "express";
 import bcrypt from "bcrypt";
-import { register } from "./models/register";
-let router = express.Router();
+import { register } from "./models/register.js";
+import jwt from "jsonwebtoken";
+export let router = express.Router();
 
-router.post("/register", (req, res) => {
+router.post("/register", async (req, res) => {
   let obj = req.body;
-  let dbUserCheck = register.findOne({ email: obj.email });
+  let dbUserCheck = await register.findOne({ email: obj.email });
   if (dbUserCheck) {
-    res.send(400).json({
+    return res.status(400).json({
       error: true,
       meassage: "User already registered",
       user: null,
     });
-    let saltRounds = 12;
-    let hashedPassword = bcrypt.hash(obj.password, saltRounds);
-    obj.password = hashedPassword;
+  }
+  let saltRounds = 12;
+  let hashedPassword = await bcrypt.hash(obj.password, saltRounds);
+  obj.password = hashedPassword;
 
-    let newUser = new register(obj);
-    newUser = newUser.save();
-    res.send(200).json({
-      error: false,
-      meassage: "User registerd successfully",
-      user: newUser,
+  let newUser = new register(obj);
+  newUser = await newUser.save();
+  res.status(200).json({
+    error: false,
+    meassage: "User registerd successfully",
+    user: newUser,
+  });
+});
+
+router.post("/login", async (req, res) => {
+  let obj = req.body;
+
+  let dbUser = await register.find({ email: obj.email });
+
+  if (!dbUser) {
+    return res.status(404).json({
+      error: true,
+      meassage: "User not found",
+      user: null,
     });
   }
-  res.send("register api creacte");
+
+  let comparePassword = await bcrypt.compare(
+    obj.password,
+    dbUserCheck.password
+  );
+
+  if (!comparePassword) {
+    return res.status(400).json({
+      error: true,
+      meassage: "Input field is wrong",
+      data: null,
+    });
+  }
+  let token = jwt.sign({
+    user: dbUser,
+  });
+  res.status(202).json({
+    error: false,
+    meassage: "User login successfully",
+    user: dbUser,
+    token: token,
+  });
 });

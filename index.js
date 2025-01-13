@@ -3,6 +3,8 @@ let app = express();
 import "dotenv/config";
 import cors from "cors";
 import mongoose from "mongoose";
+import { router } from "./routers/auth.js";
+
 app.use(express.json());
 app.use(cors("*"));
 
@@ -15,6 +17,7 @@ mongoose
     console.log(error);
   });
 
+app.use("/auth", router);
 app.get("/", (req, res) => {
   res.send("Get request called");
 });
