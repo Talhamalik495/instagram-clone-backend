@@ -1,7 +1,8 @@
 import express from "express";
 import bcrypt from "bcrypt";
-import { register } from "./models/register.js";
+import "dotenv/config";
 import jwt from "jsonwebtoken";
+import { register } from "./models/register.js";
 export let router = express.Router();
 
 router.post("/register", async (req, res) => {
@@ -10,7 +11,7 @@ router.post("/register", async (req, res) => {
   if (dbUserCheck) {
     return res.status(400).json({
       error: true,
-      meassage: "User already registered",
+      message: "User already registered",
       user: null,
     });
   }
@@ -22,7 +23,7 @@ router.post("/register", async (req, res) => {
   newUser = await newUser.save();
   res.status(200).json({
     error: false,
-    meassage: "User registerd successfully",
+    message: "User registerd successfully",
     user: newUser,
   });
 });
@@ -30,34 +31,34 @@ router.post("/register", async (req, res) => {
 router.post("/login", async (req, res) => {
   let obj = req.body;
 
-  let dbUser = await register.find({ email: obj.email });
+  let dbUser = await register.findOne({ email: obj.email });
 
   if (!dbUser) {
     return res.status(404).json({
       error: true,
-      meassage: "User not found",
+      message: "User not found",
       user: null,
     });
   }
 
-  let comparePassword = await bcrypt.compare(
-    obj.password,
-    dbUserCheck.password
-  );
+  let comparePassword = await bcrypt.compare(obj.password, dbUser.password);
 
   if (!comparePassword) {
     return res.status(400).json({
       error: true,
-      meassage: "Input field is wrong",
+      message: "Input field is wrong",
       data: null,
     });
   }
-  let token = jwt.sign({
-    user: dbUser,
-  });
+  let token = jwt.sign(
+    {
+      user: dbUser,
+    },
+    process.env.AUTHSECRET
+  );
   res.status(202).json({
     error: false,
-    meassage: "User login successfully",
+    message: "User login successfully",
     user: dbUser,
     token: token,
   });
