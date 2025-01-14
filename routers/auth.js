@@ -2,9 +2,9 @@ import express from "express";
 import bcrypt from "bcrypt";
 import "dotenv/config";
 import jwt from "jsonwebtoken";
+import Joi from "joi";
 import Register from "../models/register.js";
 export let router = express.Router();
-
 router.post("/register", async (req, res) => {
   let obj = req.body;
   let dbUserCheck = await Register.findOne({ email: obj.email });
